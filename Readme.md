@@ -18,5 +18,5 @@
 
 ## Then go to Eclipse and go to C:\Users\curso\.m2 (folder direction) folder,and delete repository folder.
 
-## Finally open Eclipse and update the project with maven update,and lauch with Spring Boot App
+## Finally open Eclipse and update the project with maven update,and launch with Spring Boot App
 
