@@ -12,11 +12,11 @@
 
 # English
 
-# Steps to make it work
+## Steps to make it work
 
-# If the project give you problems when you go to launch it or when you import,you need to go to windows->preference->user settings and then copy the direction of the settings.
+## If the project give you problems when you go to launch it or when you import,you need to go to windows->preference->user settings and then copy the direction of the settings.
 
-# Then go to Eclipse and go to C:\Users\curso\.m2 (folder direction) folder,and delete repository folder.
+## Then go to Eclipse and go to C:\Users\curso\.m2 (folder direction) folder,and delete repository folder.
 
-# Finally open Eclipse and update the project with maven update,and lauch with Spring Boot App
+## Finally open Eclipse and update the project with maven update,and lauch with Spring Boot App
 
