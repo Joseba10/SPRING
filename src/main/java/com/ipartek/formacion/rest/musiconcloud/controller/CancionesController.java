@@ -28,11 +28,20 @@ public class CancionesController {
 	CancionesRepository cancionesRepository;
 	
 	@RequestMapping(value = "/cancion/", method = RequestMethod.GET)
-	public ResponseEntity<Object> listar() {
+	public ResponseEntity<Object> listar(@RequestParam() String nombre) {
 
 		ResponseEntity<Object> result = null;
+		ArrayList<Cancion> lista=null;
 		try {
-			ArrayList<Cancion> lista = (ArrayList<Cancion>) cancionesRepository.findAll();
+			if (nombre!=null) {
+				lista= (ArrayList<Cancion>)cancionesRepository.findByNombreContaining(nombre);
+			
+			}else {
+			lista=(ArrayList<Cancion>)cancionesRepository.findAll();
+			}
+			
+			
+			
 			if (lista.isEmpty()) {
 				result = new ResponseEntity<Object>(HttpStatus.NO_CONTENT);
 			} else {
