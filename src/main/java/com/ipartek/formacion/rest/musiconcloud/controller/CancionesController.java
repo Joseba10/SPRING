@@ -1,7 +1,6 @@
 package com.ipartek.formacion.rest.musiconcloud.controller;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 import javax.validation.Valid;
@@ -11,6 +10,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,29 +19,30 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ipartek.formacion.rest.musiconcloud.domain.Cancion;
+
 import com.ipartek.formacion.rest.musiconcloud.domain.ResponseMensaje;
 import com.ipartek.formacion.rest.musiconcloud.model.CancionesRepository;
 
+@CrossOrigin(origins = "*")
 @RestController
 public class CancionesController {
+
 	@Autowired
 	CancionesRepository cancionesRepository;
-	
-	@RequestMapping(value = "/cancion/", method = RequestMethod.GET)
-	public ResponseEntity<Object> listar(@RequestParam() String nombre) {
+
+	@RequestMapping(value = { "/cancion/", "/cancion" }, method = RequestMethod.GET)
+	public ResponseEntity<Object> listar(@RequestParam(required = false) String nombre) {
 
 		ResponseEntity<Object> result = null;
-		ArrayList<Cancion> lista=null;
+		ArrayList<Cancion> lista = null;
 		try {
-			if (nombre!=null) {
-				lista= (ArrayList<Cancion>)cancionesRepository.findByNombreContaining(nombre);
-			
-			}else {
-			lista=(ArrayList<Cancion>)cancionesRepository.findAll();
+
+			if (nombre != null && !"".equals(nombre)) {
+				lista = (ArrayList<Cancion>) cancionesRepository.findByNombreContaining(nombre);
+			} else {
+				lista = (ArrayList<Cancion>) cancionesRepository.findAll();
 			}
-			
-			
-			
+
 			if (lista.isEmpty()) {
 				result = new ResponseEntity<Object>(HttpStatus.NO_CONTENT);
 			} else {
@@ -79,12 +80,13 @@ public class CancionesController {
 
 		ResponseEntity<Object> result = null;
 		try {
-			
+
 			cancionesRepository.deleteById(id);
 			result = new ResponseEntity<Object>(HttpStatus.OK);
-			
-		}catch (EmptyResultDataAccessException e) {
+
+		} catch (EmptyResultDataAccessException e) {
 			result = new ResponseEntity<Object>(HttpStatus.NOT_FOUND);
+
 		} catch (Exception e) {
 			e.printStackTrace();
 			result = new ResponseEntity<Object>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -94,7 +96,7 @@ public class CancionesController {
 
 	}
 
-	@RequestMapping(value = {"/cancion/","/cancion"}, method = RequestMethod.POST)
+	@RequestMapping(value = "/cancion/", method = RequestMethod.POST)
 	public ResponseEntity<Object> insertar(@Valid @RequestBody Cancion cancion) {
 
 		ResponseEntity<Object> result = null;
@@ -102,17 +104,18 @@ public class CancionesController {
 			cancionesRepository.save(cancion);
 			result = new ResponseEntity<Object>(cancion, HttpStatus.CREATED);
 
-		}catch (DataIntegrityViolationException e) {
-			result = new ResponseEntity<Object>(new ResponseMensaje("Ya existe el nombre de la cancion"),HttpStatus.CONFLICT);
-		}
-		catch (Exception e) {
+		} catch (DataIntegrityViolationException e) {
+
+			result = new ResponseEntity<Object>(new ResponseMensaje("Existe el nombre de la Cancion"),
+					HttpStatus.CONFLICT);
+		} catch (Exception e) {
 			e.printStackTrace();
 			result = new ResponseEntity<Object>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		return result;
-		
+
 	}
-	
+
 	@RequestMapping(value = "/cancion/{id}", method = RequestMethod.PUT)
 	public ResponseEntity<Object> update(@Valid @RequestBody Cancion cancion, @PathVariable int id) {
 
@@ -127,9 +130,7 @@ public class CancionesController {
 			result = new ResponseEntity<Object>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		return result;
-		
+
 	}
-	
-	
-	
+
 }
