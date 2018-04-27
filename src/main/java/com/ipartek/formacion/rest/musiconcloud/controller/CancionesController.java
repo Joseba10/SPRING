@@ -7,15 +7,19 @@ import java.util.Optional;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ipartek.formacion.rest.musiconcloud.domain.Cancion;
+import com.ipartek.formacion.rest.musiconcloud.domain.ResponseMensaje;
 import com.ipartek.formacion.rest.musiconcloud.model.CancionesRepository;
 
 @RestController
@@ -23,63 +27,100 @@ public class CancionesController {
 	@Autowired
 	CancionesRepository cancionesRepository;
 	
-	@RequestMapping(value="/cancion/",method = RequestMethod.GET)
-    public List<Cancion> listar() {
-        /*
-		ArrayList<Cancion> lista= new ArrayList<Cancion>();
-		Cancion cancion= null;
+	@RequestMapping(value = "/cancion/", method = RequestMethod.GET)
+	public ResponseEntity<Object> listar() {
 
-		for (int i = 0; i < 10; i++) {
-	
-				cancion= new Cancion();
-				cancion.setId(i);
-				cancion.setNombre("Cancion"+1);
-				lista.add(cancion);
-				}
-		return lista;*/
-		
-		return (List<Cancion>)cancionesRepository.findAll(); 
-		
-		/**
-		 *  Al lanzar la aplicacion inicializarlo con Boot Dasboard que esta en windows show view 
-		 */
-		
-    }
-	
-	@RequestMapping(value="/cancion/{id}",method = RequestMethod.GET)
-    public Optional<Cancion> detalle(@PathVariable int id) {
-
-        
-		/*Cancion cancion = new Cancion();
-		cancion.setId(id);
-		cancion.setNombre("Cancion"+id);		
-		return cancion;*/
-		return cancionesRepository.findById(id); //Tienes que poner en public opcional porque puede que te pueda llegar un valor vacio null
-    }
-	
-	@RequestMapping(value="/cancion/{id}",method = RequestMethod.DELETE)
-	  public Cancion eliminar (@PathVariable int id) {
-	        
-			Cancion cancion = new Cancion();
-			cancion.setId(id);
-			cancion.setNombre("Cancion"+id);		
-			return cancion;
-	    }
-	
-	@RequestMapping(value="/cancion/",method = RequestMethod.POST)
-	  public ResponseEntity<Object> insertar (@RequestBody Cancion cancion) {
+		ResponseEntity<Object> result = null;
 		try {
-			cancionesRepository.save(cancion);
-			return new ResponseEntity<Object>(HttpStatus.CREATED);
-			
+			ArrayList<Cancion> lista = (ArrayList<Cancion>) cancionesRepository.findAll();
+			if (lista.isEmpty()) {
+				result = new ResponseEntity<Object>(HttpStatus.NO_CONTENT);
+			} else {
+				result = new ResponseEntity<Object>(lista, HttpStatus.OK);
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			return new ResponseEntity<Object>(HttpStatus.BAD_REQUEST);
+			result = new ResponseEntity<Object>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 
+		return result;
+	}
 
-		
+	@RequestMapping(value = "/cancion/{id}", method = RequestMethod.GET)
+	public ResponseEntity<Object> detalle(@PathVariable int id) {
+		ResponseEntity<Object> result = null;
+		try {
+			Optional<Cancion> cancion = cancionesRepository.findById(id);
+			if (!cancion.isPresent()) {
+				result = new ResponseEntity<Object>(HttpStatus.NO_CONTENT);
+			} else {
+				result = new ResponseEntity<Object>(cancion, HttpStatus.OK);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			result = new ResponseEntity<Object>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+
+		return result;
+
+	}
+
+	@RequestMapping(value = "/cancion/{id}", method = RequestMethod.DELETE)
+	public ResponseEntity<Object> eliminar(@PathVariable int id) {
+
+		ResponseEntity<Object> result = null;
+		try {
+			
+			cancionesRepository.deleteById(id);
+			result = new ResponseEntity<Object>(HttpStatus.OK);
+			
+		}catch (EmptyResultDataAccessException e) {
+			result = new ResponseEntity<Object>(HttpStatus.NOT_FOUND);
+		} catch (Exception e) {
+			e.printStackTrace();
+			result = new ResponseEntity<Object>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+
+		return result;
+
+	}
+
+	@RequestMapping(value = {"/cancion/","/cancion"}, method = RequestMethod.POST)
+	public ResponseEntity<Object> insertar(@Valid @RequestBody Cancion cancion) {
+
+		ResponseEntity<Object> result = null;
+		try {
+			cancionesRepository.save(cancion);
+			result = new ResponseEntity<Object>(cancion, HttpStatus.CREATED);
+
+		}catch (DataIntegrityViolationException e) {
+			result = new ResponseEntity<Object>(new ResponseMensaje("Ya existe el nombre de la cancion"),HttpStatus.CONFLICT);
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+			result = new ResponseEntity<Object>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		return result;
 		
 	}
+	
+	@RequestMapping(value = "/cancion/{id}", method = RequestMethod.PUT)
+	public ResponseEntity<Object> update(@Valid @RequestBody Cancion cancion, @PathVariable int id) {
+
+		ResponseEntity<Object> result = null;
+		try {
+			cancion.setId(id);
+			cancionesRepository.save(cancion);
+			result = new ResponseEntity<Object>(cancion, HttpStatus.CREATED);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			result = new ResponseEntity<Object>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		return result;
+		
+	}
+	
+	
 	
 }
