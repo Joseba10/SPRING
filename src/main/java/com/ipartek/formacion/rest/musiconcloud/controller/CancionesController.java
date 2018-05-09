@@ -82,7 +82,7 @@ public class CancionesController {
 		try {
 
 			cancionesRepository.deleteById(id);
-			result = new ResponseEntity<Object>(HttpStatus.OK);
+			result = new ResponseEntity<Object>(new ResponseMensaje("registro eliminado"),HttpStatus.OK);
 
 		} catch (EmptyResultDataAccessException e) {
 			result = new ResponseEntity<Object>(HttpStatus.NOT_FOUND);
